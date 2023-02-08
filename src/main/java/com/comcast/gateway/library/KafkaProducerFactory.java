@@ -1,17 +1,25 @@
 package com.comcast.gateway.library;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.RecordMetadata;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 public class KafkaProducerFactory<K, V> {
     private final KafkaProducer<K, V> producer;
     private final String topic;
 
+    private static final Logger logger = LoggerFactory.getLogger(KafkaProducerFactory.class);
 
     public static <K,V> Builder<K, V> newBuilder() {
         return new Builder();
@@ -26,7 +34,7 @@ public class KafkaProducerFactory<K, V> {
     }
 
     public static Builder<String, String> newStringBuilder() {
-        return KafkaProducerFactory.<String, String>newStringBuilder().withValueSerializer(new StringSerializer());
+        return KafkaProducerFactory.<String>newStringKeyBuilder().withValueSerializer(new StringSerializer());
     }
 
     public KafkaProducerFactory(Map<String, Object> props, String topic, Serializer<K> keySerializer, Serializer<V> valueSerializer) {
@@ -35,6 +43,18 @@ public class KafkaProducerFactory<K, V> {
     }
 
 
+    public CompletableFuture<RecordMetadata> publish(K k, V v) {
+        CompletableFuture<RecordMetadata> f = new CompletableFuture<>();
+        producer.send(new ProducerRecord<>(topic, k, v), (m, e) -> {
+            logger.info("Sending data with key: {} and value: {}", k, v);
+            if(e != null) {
+                f.completeExceptionally(e);
+            } else  {
+                f.complete(m);
+            }
+        });
+        return f;
+    }
 
     public static class Builder<K, V> {
         private Serializer<K> keySerializer;
