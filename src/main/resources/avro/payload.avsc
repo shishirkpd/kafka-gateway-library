@@ -1,0 +1,32 @@
+{
+  "namespace": "com.comcast.gateway.library",
+  "type": "record",
+  "name": "PayloadWithMetaInfo",
+  "fields": [
+    {
+      "name": "lastUpdateSourceSystem",
+      "type": "string",
+      "avro.java.string": "String"
+    },
+    {
+      "name": "lastUpdateEventId",
+      "type": "string",
+      "avro.java.string": "String"
+    },
+    {
+      "name": "processingWorkflowSystem",
+      "type": "string",
+      "avro.java.string": "String"
+    },
+    {
+      "name": "lastChangeDateTimestamp",
+      "type": "string",
+      "avro.java.string": "String"
+    },
+    {
+      "name": "messageString",
+      "type": "string",
+      "avro.java.string": "String"
+    }
+  ]
+}
